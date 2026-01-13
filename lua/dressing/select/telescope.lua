@@ -79,6 +79,9 @@ M.select = function(config, items, opts, on_choice)
 
   local entry_maker = function(item)
     local formatted = opts.format_item(item)
+    if type(formatted) == "string" then
+      formatted = vim.trim(formatted)
+    end
     return {
       display = formatted,
       ordinal = formatted,
