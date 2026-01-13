@@ -491,15 +491,15 @@ local show_input = util.make_queued_async_fn(2, function(opts, on_confirm)
   })
 
   -- Configure nvim-cmp if installed
-  local has_cmp, cmp = pcall(require, "cmp")
-  if has_cmp then
-    cmp.setup.buffer({
-      enabled = opts.completion ~= nil,
-      sources = {
-        { name = "omni" },
-      },
-    })
-  end
+  --local has_cmp, cmp = pcall(require, "cmp")
+  --if has_cmp then
+  --  cmp.setup.buffer({
+  --    enabled = opts.completion ~= nil,
+  --    sources = {
+  --      { name = "omni" },
+  --    },
+  --  })
+  --end
   -- Disable mini.nvim completion if installed
   vim.api.nvim_buf_set_var(bufnr, "minicompletion_disable", true)
   if opts.completion then
