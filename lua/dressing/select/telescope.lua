@@ -4,6 +4,39 @@ M.is_supported = function()
   return pcall(require, "telescope")
 end
 
+-- 将 { { 'abc', 'Keyword' }, { 'xyz', 'Title' } } 格式转换为 telescope 高亮格式
+-- 返回: (string, highlights)
+-- highlights 格式: { { {start, end}, hl_group }, ... }
+local function convert_highlights(items)
+  local text = ""
+  local highlights = {}
+  local current_pos = 0
+
+  for _, item in ipairs(items) do
+    if type(item) == "string" then
+      -- 纯字符串，无高亮
+      text = text .. item
+      current_pos = vim.api.nvim_strwidth(text)
+    elseif type(item) == "table" then
+      local item_text = item[1]
+      text = text .. item_text
+
+      -- 只有当有高亮组时才添加高亮
+      if item[2] then
+        local hl_group = item[2]
+        table.insert(highlights, {
+          { current_pos, current_pos + vim.api.nvim_strwidth(item_text) },
+          hl_group,
+        })
+      end
+
+      current_pos = vim.api.nvim_strwidth(text)
+    end
+  end
+
+  return text, highlights
+end
+
 M.custom_kind = {
   codeaction = function(opts, defaults, items)
     local entry_display = require("telescope.pickers.entry_display")
@@ -78,13 +111,21 @@ M.select = function(config, items, opts, on_choice)
   on_choice = vim.schedule_wrap(on_choice)
 
   local entry_maker = function(item)
-    local formatted = opts.format_item(item)
+    local formatted = opts.format_item(item, true)
     if type(formatted) == "string" then
       formatted = vim.trim(formatted)
+      return {
+        display = formatted,
+        ordinal = formatted,
+        value = item,
+      }
     end
+    local text, highlights = convert_highlights(formatted)
     return {
-      display = formatted,
-      ordinal = formatted,
+      display = function(_entry)
+        return text, highlights
+      end,
+      ordinal = text,
       value = item,
     }
   end

@@ -23,6 +23,9 @@ M.get_backend = function(backends)
 end
 
 local function sanitize_line(line)
+  if type(line) == "table" and type(line[1]) == "table" then
+    return line
+  end
   return string.gsub(tostring(line), "\n", " ")
 end
 
